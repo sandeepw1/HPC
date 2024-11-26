@@ -1,0 +1,94 @@
+Create a 3 Node HPC cluster using OpenMPI
+
+1. Install Centos9 on all machines. Provide names to these machines - master,node1,node2.
+2. Find IP address of each machine.
+3. Update /etc/hosts file on all nodes with IP address and name of each node.
+4. Configure passwordless ssh between all nodes.
+5. Install epel-release 
+6. Install nfs-utils openmpi openmpi-devel autofs indent xterm on all nodes.
+7. create /nfs/prog directory on master.
+8. make the user as owner of this directory.
+9. add entry of /nfs directory in the /etc/exports file to share using nfs.
+10. start and enable nfs-server service
+11. Start and enable rpcbind service.
+12. check with showmount -e localhost
+13. open nfs service port in firewalld
+14. firewall-cmd --add-rich-rule='rule family="ipv4" source address="node1 IP" accept'
+add above rule on each nodes for all nodes.
+15. go to node1... configure autofs to mount /nfs directory.
+16. edit /etc/auto.master and add
+/nfs   /etc/auto.nfs
+save the file.
+17. create /nfs directory and make the user owner. create /etc/auto.nfs file and add
+prog -rw  master:/nfs/prog
+save the file.
+18. Start and enable autofs service.
+19. Start and enable rpcbind service.
+20. Perform above autofs steps on other nodes.
+21. Now go to the master in /nfs/prog directory and create a file by name hello.c
+type following.
+#include <stdio.h>
+#include <mpi.h>
+
+int main(int argc, char *argv[])
+{
+
+    int rank, size;
+
+    MPI_Init(&argc, &argv);	/* Starts MPI */
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);	/* Get current process id */
+    MPI_Comm_size(MPI_COMM_WORLD, &size);	/* Get number of process */
+
+    printf("Hello World from %d of %d !\n", rank, size);
+
+    MPI_Finalize();		/* End of MPI */
+
+    return 0;
+
+}
+
+save the file.
+22. edit .bashrc file on all nodes and add following
+PATH=$PATH:/usr/lib64/openmpi/bin
+#LD_LIBRARY_PATH=/usr/lib64/openmpi/lib
+save the file.
+23. source .bashrc
+24. On other nodes check that hello.c file is visible in /nfs/prog directory.
+25. Go to the master. Go to /nfs/prog directory and compile the program using 
+mpicc hello.c
+26. run ./a.out and check the output.
+27. now create a file by name machinefile.
+and add following
+
+master slots=2
+node1  slots=2
+node2  slots=2
+save the file.
+28. now run the program using 
+mpirun  -n 6 --machinefile machinefile ./a.out
+29. Use xterm & and top to check if the program executes on all nodes.
+
+Try following code.
+
+#include <stdio.h>
+#include <mpi.h>
+
+int main(int argc, char *argv[]) {
+        
+        int rank, len, size;
+        char name[MPI_MAX_PROCESSOR_NAME];
+
+        MPI_Init(&argc,&argv);
+
+        MPI_Comm_size(MPI_COMM_WORLD,&size);
+        MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+        MPI_Get_processor_name(name, &len);
+
+        printf("Hello World!!! from process %d on %s out of %d processes!!!\n",rank,name,size);
+
+        MPI_Finalize();
+
+        return 0;
+}
+
+

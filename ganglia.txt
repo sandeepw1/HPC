@@ -1,0 +1,53 @@
+Install epel-release on all nodes.
+
+yum install -y rrdtool rrdtool-devel ganglia-web ganglia-gmetad  ganglia-gmond ganglia-python3-gmond httpd httpd-tools apr-devel zlib-devel  libconfuse-devel expat-devel pcre-devel
+
+Go to /etc/ganglia and edit gmetad.conf file.
+
+In the data source parameter add your cluster name.
+Save the file.
+Now edit the gmond.conf file.
+Go to the cluster section and add your cluster name in name and  owner.
+save the file.
+
+vi /etc/httpd/conf.d/ganglia.conf
+put a # for Require local
+and add Require all granted
+
+Create a user for ganglia
+htpasswd -c /etc/httpd/auth.basic ganglia
+enter password for the user.
+Disable SELINUX. 
+Start the httpd service.
+Enable httpd service.
+Open port 80 8660-8663 8651 8649 in the firewall.
+systemctl start gmetad
+systemctl enable gmetad
+systemctl start gmond
+systemctl enable gmond
+Try accessing ganglia dashboard.
+ip/ganglia
+
+On the client install ganglia-gmond package.Also install python-gmond module.
+edit /etc/ganglia/gmond.conf file. 
+Add cluster name in the cluster section.
+Start the gmond service.
+
+Now in the ganglia dashboard you should get the new client. You may need to refresh the dashboard.
+
+On ubuntu node 
+sudo apt list | grep ganglia
+
+install ganglia-monitor and ganglia-monitor-python 
+All other configuration is same.
+
+
+
+
+
+
+
+
+
+
+
