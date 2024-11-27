@@ -5,7 +5,7 @@ login using su - and provide root password given during installation.
 
 Install following packages.
 	a. yum update -y
-	b. yum install nfs-utils openmpi openmpi-devel autofs indent xterm epel-release  -y
+	b. yum install nfs-utils openmpi openmpi-devel autofs epel-release  -y
 
 Provide sudo permission to the user created during installation.
 	visudo
@@ -24,8 +24,9 @@ Disable SELinux
 In the file you will find SELINUX=Enforcing parameter.
 change it to SELINUX=disabled.
 save the file.
-
-Add path to openmpi directory to path using bashrc file.
+exit as root. Type 
+exit
+Add path to openmpi directory to path using bashrc file for user.
 	cd
 	vim .bashrc   # edit bashrc file and type following at the end of the file.
 
