@@ -46,7 +46,7 @@ Provide names to these machines -
  On the node1 give command
         sudo hostnamectl set-hostname node1
 On the node2 give command
-	sudo hostnamectl set-hostname node1
+	sudo hostnamectl set-hostname node2
 
 2. Find IP address of each machine.
 3. Update /etc/hosts file on all nodes with IP address and name of each node. The file entry should be as below.
