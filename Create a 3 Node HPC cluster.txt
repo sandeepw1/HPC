@@ -22,7 +22,7 @@ Disable Firewall service.
 Disable SELinux
 	vi  /etc/selinux/config
 In the file you will find SELINUX=Enforcing parameter.
-change it to SELINUX=disabled.
+change it to SELINUX=disabled
 save the file.
 exit as root. Type 
 exit
