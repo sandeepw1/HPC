@@ -1,0 +1,40 @@
+squeue --user=your_rc-username
+squeue --user=your_rc-username --long
+scancel your_job-id
+scancel your_job-id1, your_job-id2, your_jobiid3
+sstat --jobs=your_job-id
+sstat --jobs=your_job-id --format=jobid,cputime,maxrss,ntasks
+sacct --jobs=your_job-id
+sacct –-jobs=your_job-id –-starttime=YYYY-MM-DD --long
+sacct --jobs=your_job-id --starttime=2024-03-12 --format=jobname,nnodes,ncpus,maxrss,elapsed
+scontrol suspend job_id
+scontrol resume job_id
+scontrol hold job_id
+scontrol release job_id
+scontrol show job job_id
+
+
+Slurm scripts
+
+#!/bin/bash
+#SBATCH --job-name=my_job_name        # Job name
+#SBATCH --output=output.txt           # Standard output file
+#SBATCH --error=error.txt             # Standard error file
+#SBATCH --partition=partition_name    # Partition or queue name
+#SBATCH --nodes=1                     # Number of nodes
+#SBATCH --ntasks-per-node=1           # Number of tasks per node
+#SBATCH --cpus-per-task=1             # Number of CPU cores per task
+#SBATCH --time=1:00:00                # Maximum runtime (D-HH:MM:SS)
+#SBATCH --mail-type=END               # Send email at job completion
+#SBATCH --mail-user=your@email.com    # Email address for notifications
+
+#Load necessary modules (if needed)
+#module load module_name
+
+#Your job commands go here
+#For example:
+#python my_script.py
+
+#Optionally, you can include cleanup commands here (e.g., after the job finishes)
+#For example:
+#rm some_temp_file.txt

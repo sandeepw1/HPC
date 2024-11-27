@@ -1,0 +1,187 @@
+Create a 3 Node HPC cluster using OpenMPI
+
+1. Install Centos9 on one virtual machine. 
+login using su - and provide root password given during installation.
+
+Install following packages.
+	a. yum update -y
+	b. yum install nfs-utils openmpi openmpi-devel autofs indent xterm epel-release  -y
+
+Provide sudo permission to the user created during installation.
+	visudo
+In the file that opens add following line.
+
+	username    ALL=(ALL)      NOPASSWD:ALL
+Make sure you replace username with the name of the user you created during installation.
+save the file.
+
+Disable Firewall service.
+	systemctl stop firewalld
+	systemctl dusable firewalld
+
+Disable SELinux
+	vi  /etc/selinux/config
+In the file you will find SELINUX=Enforcing parameter.
+change it to SELINUX=disabled.
+save the file.
+
+Add path to openmpi directory to path using bashrc file.
+	cd
+	vim .bashrc   # edit bashrc file and type following at the end of the file.
+
+	PATH=$PATH:/usr/lib64/openmpi/bin
+	#LD_LIBRARY_PATH=/usr/lib64/openmpi/lib
+save the file.
+
+Now shutdown the virtual machine.
+
+Now create 2 clones of this virtual machines by name node1 and node2. 
+
+Once the nodes are created. Start all the 3 virtual machines.
+Login as user (not root).
+Provide names to these machines - 
+ on master node give command
+	sudo hostnamectl set-hostname master
+ On the node1 give command
+        sudo hostnamectl set-hostname node1
+On the node2 give command
+	sudo hostnamectl set-hostname node1
+
+2. Find IP address of each machine.
+3. Update /etc/hosts file on all nodes with IP address and name of each node. The file entry should be as below.
+192.168.230.128   master
+192.168.230.129   node1
+192.168.230.130   node2.
+Type your IP addresses. Do not delete any earlier lines in the file.
+4. Configure passwordless ssh between Master and other nodes.
+On the master node give following commands.
+	a. cd
+	b. ssh-keygen 
+	press enter at all prompts.
+	c. ssh-copy-id -i .ssh/id_rsa.pub  your-username@node1
+	type yes at the prompt.
+	Enter user password when prompted.
+	d. ssh-copy-id -i .ssh/id_rsa.pub  your-username@node2
+	perform same for node2.
+
+5. create /nfs/prog directory on master.
+	sudo mkdir -p /nfs/prog
+
+6. make the user as owner of this directory.
+	sudo chown your-username /nfs/prog
+
+7. add entry of /nfs directory in the /etc/exports file to share using nfs.
+	sudo  vim /etc/exports         # add following line
+	/nfs     *(rw,sync,no_root_squash)
+
+save the file.
+8. start and enable nfs-server service
+	sudo systemctl start nfs-server
+	sudo systemctl status nfs-server
+	sudo systemctl enable nfs-server
+
+9. Start and enable rpcbind service.
+	sudo systemctl start rpcbind
+	sudo systemctl status rpcbind
+	sudo systemctl enable rpcbind
+
+10. check if the directory is properly shared.
+	 showmount -e localhost
+The command should show 
+	/nfs   *   
+
+11. Go to node1
+Login as user (Not root)
+configure autofs to mount /nfs directory.
+
+12. edit /etc/auto.master 
+	sudo vim /etc/auto.master   and add following line.
+/nfs      /etc/auto.nfs
+save the file.
+
+13. create /nfs directory and make the user owner. 
+	sudo mkdir /nfs
+
+14. create /etc/auto.nfs file 
+	sudo vi /etc/auto.nfs       and add following line.
+
+prog -rw  master:/nfs/prog
+
+save the file.
+15. Start and enable autofs service.
+	sudo systemctl start autofs
+	sudo systemctl enable autofs
+	sudo systemctl status autofs
+
+Perform above steps 11 to 15 on other nodes.
+
+16. Now go to the master in /nfs/prog directory and create a file by name hello.c
+type following.
+#include <stdio.h>
+#include <mpi.h>
+
+int main(int argc, char *argv[])
+{
+
+    int rank, size;
+
+    MPI_Init(&argc, &argv);	/* Starts MPI */
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);	/* Get current process id */
+    MPI_Comm_size(MPI_COMM_WORLD, &size);	/* Get number of process */
+
+    printf("Hello World from %d of %d !\n", rank, size);
+
+    MPI_Finalize();		/* End of MPI */
+
+    return 0;
+
+}
+
+save the file.
+
+17. On node1 and node2 check that hello.c file is visible in /nfs/prog directory.
+Login to node and node 2 and give following command
+	ls /nfs/prog
+You should be able to see hello.c
+
+18. Go to the master. Go to /nfs/prog directory and compile the program using 
+mpicc -o hello hello.c
+
+19. run and check the output.
+	mpirun  ./hello
+27. now create a file by name machinefile.
+and add following
+
+master slots=2
+node1  slots=2
+node2  slots=2
+save the file.
+
+28. now run the program using 
+mpirun  --machinefile machinefile ./hello
+
+Similarly 
+Try following code.
+
+#include <stdio.h>
+#include <mpi.h>
+
+int main(int argc, char *argv[]) {
+        
+        int rank, len, size;
+        char name[MPI_MAX_PROCESSOR_NAME];
+
+        MPI_Init(&argc,&argv);
+
+        MPI_Comm_size(MPI_COMM_WORLD,&size);
+        MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+        MPI_Get_processor_name(name, &len);
+
+        printf("Hello World!!! from process %d on %s out of %d processes!!!\n",rank,name,size);
+
+        MPI_Finalize();
+
+        return 0;
+}
+
+
