@@ -52,7 +52,7 @@ On the node2 give command
 3. Update /etc/hosts file on all nodes with IP address and name of each node. The file entry should be as below.
 192.168.230.128   master
 192.168.230.129   node1
-192.168.230.130   node2.
+192.168.230.130   node2
 Type your IP addresses. Do not delete any earlier lines in the file.
 4. Configure passwordless ssh between Master and other nodes.
 On the master node give following commands.
