@@ -10,15 +10,15 @@ sudo apt update -y
 sudo apt upgrade -y
 sudo apt install mpich libmpich-dev libopenmpi-dev build-essential make gcc g++ automake autoconf nfs-kernel-server vim -y
 sudo hostnamectl set-hostname master
-mip = hostname
+mip =$(hostname  --all-ip-addresses)
 echo "$mip    master" | sudo tee -a /etc/hosts
 read -p "Enter Node1 IP address: " n1-ip
 echo "$n1-ip  node1" | sudo tee -a /etc/hosts
-read -p "Enter Node1 IP address: " n2-ip
+read -p "Enter Node2 IP address: " n2-ip
 echo "$n2-ip  node2" | sudo tee -a /etc/hosts
 echo "#### Copying host file to other nodes ##########"
 echo "### Type yes at the prompt #######"
-echo "### When asked enter password for the user ###"
+echo "### Enter password when asked to enter password for the user ###"
 pause 3
 user=$(whoami)
 scp /etc/hosts  $user@node1:/home/$user
