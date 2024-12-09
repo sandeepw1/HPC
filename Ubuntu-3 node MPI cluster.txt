@@ -1,0 +1,81 @@
+#Create a 3 Node HPC cluster using OpenMPI
+#1. Install Ubuntu 24.04 on one virtual machine. 
+# Login as user.
+# Install SSH - sudo spt install ssh 
+# Start and enable ssh service - sudo systemctl start ssh
+# sudo systemctl enable ssh
+# Now shut down the VM. Create 2 clones of this VM. Then run the following script on the master node.
+
+sudo apt update -y
+sudo apt upgrade -y
+sudo apt install mpich libmpich-dev libopenmpi-dev build-essential make gcc g++ automake autoconf nfs-kernel-server vim -y
+sudo hostnamectl set-hostname master
+mip = hostname
+echo "$mip    master" | sudo tee -a /etc/hosts
+read -p "Enter Node1 IP address: " n1-ip
+echo "$n1-ip  node1" | sudo tee -a /etc/hosts
+read -p "Enter Node1 IP address: " n2-ip
+echo "$n2-ip  node2" | sudo tee -a /etc/hosts
+echo "#### Copying host file to other nodes ##########"
+echo "### Type yes at the prompt #######"
+echo "### When asked enter password for the user ###"
+pause 3
+user=$(whoami)
+scp /etc/hosts  $user@node1:/home/$user
+scp /etc/hosts $user@node2:/home/$user
+ssh -t $user@node1 sudo cp /home/$user/hosts /etc/hosts
+ssh -t $user@node2 sudo cp /home/$user/hosts  /etc/hosts
+echo "#### hosts file copy operation completed ###"
+echo "####### Configuring passwordless ssh between master and other nodes ########"
+pause 3
+ssh-keygen -N '' -q -f ~/.ssh/id_rsa <<< y
+ssh-copy-id  -i ~/.ssh/id_rsa.pub  $user@node1
+ssh-copy-id  -i ~/.ssh/id_rsa.pub  $user@node2
+echo "###### Passwordless SSH configuration completed #####"
+echo "##### Configuring NFS share on master #####"
+echo "#### Creating and using /nfs/cluster directory ####"
+pause 3
+sudo mkdir -p /nfs/cluster
+sudo chmod 777 /nfs/cluster
+echo "/nfs/cluster    *(rw,sync,no_root_squash,no_subtree_check)" | sudo tee /etc/exports &> /dev/null
+sudo systemctl restart rpcbind
+sudo systemctl enable rpcbind
+sudo systemctl start nfs-kernel-server
+sudo systemctl enable nfs-kernel-server
+echo "#### NFS configuration completed ######"
+echo "#### Configuring nodes ###"
+ssh -t $user@node1 'sudo apt install mpich libmpich-dev libopenmpi-dev build-essential make gcc g++ automake autoconf nfs-common autofs vim -y  &> /dev/null
+ssh -t $user@node1 'sudo hostnamectl set-hostname node1' &> /dev/null
+ssh -t $user@node1 'echo "/nfs    /etc/auto.nfs" | sudo tee -a /etc/auto.master &> /dev/null
+ssh -t $user@node1 'sudo touch /etc/auto.nfs'
+ssh -t $user@node1 'sudo mkdir /nfs'
+ssh -t $user@node1 'echo "cluster -rw  master:/nfs/cluster" | sudo tee /etc/auto.nfs' &> /dev/null
+ssh -t $user@node1 'sudo systemctl start autofs' &> /dev/null
+ssh -t $user@node1 'sudo systemctl enable autofs' &> /dev/null
+################ Node 2 configuration ##############
+ssh -t $user@node2 'sudo apt install mpich libmpich-dev libopenmpi-dev build-essential make gcc g++ automake autoconf nfs-common autofs vim -y  &> /dev/null
+ssh -t $user@node2 'sudo hostnamectl set-hostname node1' &> /dev/null
+ssh -t $user@node2 'echo "/nfs    /etc/auto.nfs" | sudo tee -a /etc/auto.master &> /dev/null
+ssh -t $user@node2 'sudo touch /etc/auto.nfs'
+ssh -t $user@node2 'echo "cluster -rw  master:/nfs/cluster" | sudo tee /etc/auto.nfs' &> /dev/null
+ssh -t $user@node2 'sudo mkdir /nfs'
+ssh -t $user@node2 'sudo systemctl start autofs' &> /dev/null
+ssh -t $user@node2 'sudo systemctl enable autofs' &> /dev/null
+echo "###### Node configuration completed ######"
+echo "###### The MPI Cluster is ready ######"
+echo "##### Test it by creating a hello MPI program in /nfs/cluster directory ####"
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+

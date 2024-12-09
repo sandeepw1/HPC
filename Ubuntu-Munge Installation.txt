@@ -1,0 +1,50 @@
+sudo groupadd -g 1010 munge
+user=$(whoami)
+ssh -t $user@node1 sudo groupadd -g 1010 munge
+ssh -t $user@node2 sudo groupadd -g 1010 munge
+sudo useradd -m -c "MUNGE User" -d /var/lib/munge -u 1010 -g munge -s /sbin/nologin munge
+ssh -t $user@node1 'sudo useradd -m -c "MUNGE User" -d /var/lib/munge -u 1010 -g munge -s /sbin/nologin munge'
+ssh -t $user@node2 'sudo useradd -m -c "MUNGE User" -d /var/lib/munge -u 1010 -g munge -s /sbin/nologin munge'
+sudo groupadd -g 1011 slurm
+ssh -t $user@node1 'sudo groupadd -g 1011 slurm'
+ssh -t $user@node2 'sudo groupadd -g 1011 slurm'
+sudo useradd -m -c "SLURM workload manager" -d /var/lib/slurm -u 1011 -g slurm -s /bin/bash slurm
+ssh -t $user@node1 'sudo useradd -m -c "SLURM workload manager" -d /var/lib/slurm -u 1011 -g slurm -s /bin/bash slurm'
+ssh -t $user@node2 'sudo useradd -m -c "SLURM workload manager" -d /var/lib/slurm -u 1011 -g slurm -s /bin/bash slurm'
+sudo apt install munge -y
+ssh -t $user@node1 'sudo apt install munge -y'
+ssh -t $user@node2 'sudo apt install munge -y'
+sudo /usr/sbin/create-munge-key
+sudo scp /etc/munge/munge.key  ~
+sudo chown $user munge.key
+scp ~/munge.key  $user@node1:/home/$user
+scp ~/munge.key  $user@node2:/home/$user
+ssh -t $user@node1 'sudo cp ~/munge.key /etc/munge'
+ssh -t $user@node1 'sudo chown -R munge: /etc/munge/ /var/log/munge/ /var/lib/munge/ /run/munge/'
+ssh -t $user@node1 'sudo chmod 0700 /etc/munge/ /var/log/munge/ /var/lib/munge/'
+ssh -t $user@node2 'sudo cp ~/munge.key /etc/munge'
+ssh -t $user@node2 'sudo chown -R munge: /etc/munge/ /var/log/munge/ /var/lib/munge/ /run/munge/'
+ssh -t $user@node2 'sudo chmod 0700 /etc/munge/ /var/log/munge/ /var/lib/munge/'
+sudo systemctl start munge
+sudo systemctl enable munge
+ssh -t $user@node1 'sudo systemctl start munge'
+ssh -t $user@node1 'sudo systemctl enable munge'
+ssh -t $user@node2 'sudo systemctl start munge'
+ssh -t $user@node2 'sudo systemctl enable munge'
+echo "##### Munge installation completed #####"
+echo "#### Checking munge installation on master ####"
+munge -n | unmunge
+echo "##### Please verify output #####"
+pause 5
+echo "#### Checking munge installation on node1 ####"
+munge -n | ssh $user@node1 unmunge
+echo "##### Please verify output #####"
+pause 5
+echo "#### Checking munge installation on node2 ####"
+munge -n | ssh $user@node2 unmunge
+echo "##### Please verify output #####"
+pause 5
+echo "#### if the output is correct....Munge Installation is complete ####"
+
+
+

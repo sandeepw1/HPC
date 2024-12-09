@@ -1,0 +1,16 @@
+############### Build slurm deb package ############
+sudo apt-get install build-essential fakeroot devscripts equivs -y
+wget https://download.schedmd.com/slurm/slurm-24.11.0.tar.bz2
+tarscp *.deb uadmin@node2:/home/uadmin -xaf slurm*tar.bz2
+cd slurm-24.11.0/
+sudo mk-build-deps -i debian/control
+sudo debuild -b -uc -us
+cd ..
+scp *.deb uadmin@node1:/home/uadmin
+scp *.deb uadmin@node2:/home/uadmin
+sudo dpkg -i  slurm-smd_24.11.0-1_amd64.deb
+sudo dpkg -i  slurm-smd-client_24.11.0-1_amd64.deb
+sudo dpkg -i slurm-smd-slurmctld_24.11.0-1_amd64.deb
+sudo dpkg -i slurm-smd-slurmdbd_24.11.0-1_amd64.deb
+
+
