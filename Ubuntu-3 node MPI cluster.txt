@@ -10,7 +10,7 @@ sudo apt update -y
 sudo apt upgrade -y
 sudo apt install mpich libmpich-dev libopenmpi-dev build-essential make gcc g++ automake autoconf nfs-kernel-server vim -y
 sudo hostnamectl set-hostname master
-mip =$(hostname  --all-ip-addresses)
+mip=$(hostname  --all-ip-addresses)
 echo "$mip    master" | sudo tee -a /etc/hosts
 read -p "Enter Node1 IP address: " n1-ip
 echo "$n1-ip  node1" | sudo tee -a /etc/hosts
