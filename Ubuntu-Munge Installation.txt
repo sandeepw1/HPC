@@ -14,7 +14,7 @@ ssh -t $user@node2 'sudo useradd -m -c "SLURM workload manager" -d /var/lib/slur
 sudo apt install munge -y
 ssh -t $user@node1 'sudo apt install munge -y'
 ssh -t $user@node2 'sudo apt install munge -y'
-sudo /usr/sbin/create-munge-key
+sudo /usr/sbin/mungekey
 sudo scp /etc/munge/munge.key  ~
 sudo chown $user munge.key
 scp ~/munge.key  $user@node1:/home/$user
