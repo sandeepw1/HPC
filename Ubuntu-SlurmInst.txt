@@ -74,6 +74,18 @@ sudo chmod 755 /var/spool/slurmctld
 sudo touch /var/log/slurm/slurmctld.log
 sudo touch /var/log/slurm/slurm_jobacct.log 
 sudo chown -R slurm:slurm /var/log/slurm/
+ssh -t node1 sudo mkdir /var/spool/slurmd
+ssh -t node1 sudo chown slurm: /var/spool/slurmd
+ssh -t node1 sudo chmod 755 /var/spool/slurmd
+ssh -t node1 sudo mkdir /var/log/slurm/
+ssh -t node1 sudo touch /var/log/slurm/slurmd.log
+ssh -t node1 sudo chown -R slurm:slurm /var/log/slurm/slurmd.log
+ssh -t node2 sudo mkdir /var/spool/slurmd
+ssh -t node2 sudo chown slurm: /var/spool/slurmd
+ssh -t node2 sudo chmod 755 /var/spool/slurmd
+ssh -t node2 sudo mkdir /var/log/slurm/
+ssh -t node2 sudo touch /var/log/slurm/slurmd.log
+ssh -t node2 sudo chown -R slurm:slurm /var/log/slurm/slurmd.log
 wget https://raw.githubusercontent.com/sandeepw1/HPC/refs/heads/main/slurm.conf
 mv 'slurm.conf'  slurm.conf
 scp slurm.conf node1:/home/uadmin
