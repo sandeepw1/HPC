@@ -1,9 +1,12 @@
-############### Build slurm deb package ############
-sudo apt-get install build-essential fakeroot devscripts equivs -y
+echo "############# Building and installing slurm deb package ############"
+pause 3
+sudo apt install build-essential fakeroot devscripts equivs -y 
+ssh -t node1 sudo apt install build-essential fakeroot devscripts equivs -y
+ssh -t node2 sudo apt install build-essential fakeroot devscripts equivs -y
 wget https://download.schedmd.com/slurm/slurm-24.11.0.tar.bz2
-tarscp *.deb uadmin@node2:/home/uadmin -xaf slurm*tar.bz2
+tar -xaf slurm*tar.bz2
 cd slurm-24.11.0/
-sudo mk-build-deps -i debian/control
+sudo mk-build-deps -i debian/control -y
 sudo debuild -b -uc -us
 cd ..
 scp *.deb uadmin@node1:/home/uadmin
@@ -12,5 +15,81 @@ sudo dpkg -i  slurm-smd_24.11.0-1_amd64.deb
 sudo dpkg -i  slurm-smd-client_24.11.0-1_amd64.deb
 sudo dpkg -i slurm-smd-slurmctld_24.11.0-1_amd64.deb
 sudo dpkg -i slurm-smd-slurmdbd_24.11.0-1_amd64.deb
-
-
+ssh -t node1 'sudo dpkg -i ~/slurm-smd_24.11.0-1_amd64.deb
+ssh -t node1 'sudo dpkg -i  ~/slurm-smd-client_24.11.0-1_amd64.deb'
+ssh -t node1 'sudo dpkg -i  ~/slurm-smd-slurmd_24.11.0-1_amd64.deb'
+echo "##########Instlling MariaDB Server ##################"
+sudo apt install mariadb-server -y
+echo "Enter a password for the database root user:"
+read pass
+mysql_secure_installation <<EOF
+y
+$pass
+$pass
+y
+y
+y
+y
+EOF
+echo "######### Remember your database root password -----------$pass ##############"
+pause 2
+sudo systemctl start maridb
+sudo systemctl enable mariadb
+mysql -e "grant all on slurm_acct_db.* TO 'slurm'@'localhost' identified by 'some_pass' with grant option"
+mysql -e "create database slurm_acct_db"
+sudo touch /etc/slurm/slurmdbd.conf
+echo "AuthType=auth/munge" | sudo tee -a /etc/slurm/slurm.conf
+echo "DbdAddr=localhost" | sudo tee -a /etc/slurm/slurm.conf
+echo "#DbdHost=master0" | sudo tee -a /etc/slurm/slurm.conf
+echo "DbdHost=localhost" | sudo tee -a /etc/slurm/slurm.conf
+echo "DbdPort=6819"  | sudo tee -a /etc/slurm/slurm.conf
+echo "SlurmUser=slurm" | sudo tee -a /etc/slurm/slurm.conf
+echo "DebugLevel=4" | sudo tee -a /etc/slurm/slurm.conf
+echo "LogFile=/var/log/slurm/slurmdbd.log" | sudo tee -a /etc/slurm/slurm.conf
+echo "PidFile=/run/slurmdbd/slurmdbd.pid"  | sudo tee -a /etc/slurm/slurm.conf
+echo "StorageType=accounting_storage/mysql"  | sudo tee -a /etc/slurm/slurm.conf
+echo "StorageHost=localhost"  | sudo tee -a /etc/slurm/slurm.conf
+echo "StorageLoc=slurm_acct_db" | sudo tee -a /etc/slurm/slurm.conf
+echo "StoragePass=$pass" | sudo tee -a /etc/slurm/slurm.conf
+echo "StorageUser=slurm" | sudo tee -a /etc/slurm/slurm.conf
+echo "###Setting database purge parameters" | sudo tee -a /etc/slurm/slurm.conf
+echo "PurgeEventAfter=12months"  | sudo tee -a /etc/slurm/slurm.conf
+echo "PurgeJobAfter=12months" | sudo tee -a /etc/slurm/slurm.conf
+echo "PurgeResvAfter=2months"  | sudo tee -a /etc/slurm/slurm.conf
+echo "PurgeStepAfter=2months"  | sudo tee -a /etc/slurm/slurm.conf
+echo "PurgeSuspendAfter=1month" | sudo tee -a /etc/slurm/slurm.conf
+echo "PurgeTXNAfter=12months" | sudo tee -a /etc/slurm/slurm.conf
+echo "PurgeUsageAfter=12months" | sudo tee -a /etc/slurm/slurm.conf
+sudo chown slurm:slurm /etc/slurm/slurmdbd.conf
+sudo chmod -R 600 /etc/slurm/slurmdbd.conf
+sudo mkdir /var/log/slurm
+sudo touch /var/log/slurm/slurmdbd.log 
+sudo chown -R slurm /var/log/slurm/ 
+sudo systemctl start slurmdbd
+sudo systemctl status slurmdb
+sudo systemctl enable slurmdb
+sudo mkdir /var/spool/slurmctld
+sudo chown slurm:slurm /var/spool/slurmctld
+sudo chmod 755 /var/spool/slurmctld
+sudo touch /var/log/slurm/slurmctld.log
+sudo touch /var/log/slurm/slurm_jobacct.log 
+sudo chown -R slurm:slurm /var/log/slurm/
+wget https://raw.githubusercontent.com/sandeepw1/HPC/refs/heads/main/slurm.conf
+mv 'slurm.conf'  slurm.conf
+scp slurm.conf node1:/home/uadmin
+ssh -t node1 'sudo scp ~/slurm.conf  /etc/slurm/'
+ssh -t node1 'slurmd -C' >> slurm.conf
+sed -i 's/node1/node[1-2]/g' slurm.conf
+sudo cp slurm.conf /etc/slurm/
+scp slurm.conf node1:/home/uadmin
+ssh -t node1 'sudo scp ~/slurm.conf  /etc/slurm/'
+ssh -t node1 'sudo systemctl restart slurmd'
+scp slurm.conf node1:/home/uadmin
+ssh -t node1 'sudo scp ~/slurm.conf  /etc/slurm/'
+ssh -t node1 'sudo systemctl start slurmd'
+sudo systemctl start slurmctld
+echo "######### Waiting for the cluster to stabilize #########"
+pause 5
+echo "############### Check the output ##############"
+echo "############## If both the nodes are shown as idle.......Cluster is ready ###########"
+sinfo -Nrl
