@@ -102,9 +102,9 @@ sudo cp slurm.conf /etc/slurm/
 scp slurm.conf node1:/home/uadmin
 ssh -t node1 'sudo scp ~/slurm.conf  /etc/slurm/'
 ssh -t node1 'sudo systemctl restart slurmd'
-scp slurm.conf node1:/home/uadmin
-ssh -t node1 'sudo scp ~/slurm.conf  /etc/slurm/'
-ssh -t node1 'sudo systemctl start slurmd'
+scp slurm.conf node2:/home/uadmin
+ssh -t node2 'sudo scp ~/slurm.conf  /etc/slurm/'
+ssh -t node2 'sudo systemctl start slurmd'
 sudo systemctl start slurmctld
 echo "######### Waiting for the cluster to stabilize #########"
 sleep 5
