@@ -36,10 +36,12 @@ echo "#### Checking munge installation on master ####"
 munge -n | unmunge
 echo "##### Please verify output #####"
 sleep 5
+ssh -t node1 sudo systemctl restart munge
 echo "#### Checking munge installation on node1 ####"
 munge -n | ssh $user@node1 unmunge
 echo "##### Please verify output #####"
 sleep 5
+ssh -t node2 sudo systemctl restart munge
 echo "#### Checking munge installation on node2 ####"
 munge -n | ssh $user@node2 unmunge
 echo "##### Please verify output #####"
