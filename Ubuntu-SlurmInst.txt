@@ -28,7 +28,6 @@ sudo apt install mariadb-server -y
 echo "Enter a password for the database root user:"
 read pass
 mysql_secure_installation <<EOF
-echo
 y
 $pass
 $pass
