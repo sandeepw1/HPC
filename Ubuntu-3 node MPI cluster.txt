@@ -12,10 +12,12 @@ sudo apt install mpich libmpich-dev libopenmpi-dev build-essential make gcc g++ 
 sudo hostnamectl set-hostname master
 mip=$(hostname  --all-ip-addresses)
 echo "$mip    master" | sudo tee -a /etc/hosts
-read -p "Enter Node1 IP address: " n1-ip
-echo "$n1-ip  node1" | sudo tee -a /etc/hosts
-read -p "Enter Node2 IP address: " n2-ip
-echo "$n2-ip  node2" | sudo tee -a /etc/hosts
+echo "Enter Node1 IP address: " 
+read ip1
+echo "$ip1  node1" | sudo tee -a /etc/hosts
+echo "Enter Node2 IP address: " 
+read ip2
+echo "$ip2  node2" | sudo tee -a /etc/hosts
 echo "#### Copying host file to other nodes ##########"
 echo "### Type yes at the prompt #######"
 echo "### Enter password when asked to enter password for the user ###"
@@ -44,18 +46,18 @@ sudo systemctl start nfs-kernel-server
 sudo systemctl enable nfs-kernel-server
 echo "#### NFS configuration completed ######"
 echo "#### Configuring nodes ###"
-ssh -t $user@node1 'sudo apt install mpich libmpich-dev libopenmpi-dev build-essential make gcc g++ automake autoconf nfs-common autofs vim -y  &> /dev/null
+ssh -t $user@node1 'sudo apt install mpich libmpich-dev libopenmpi-dev build-essential make gcc g++ automake autoconf nfs-common autofs vim -y'  &> /dev/null
 ssh -t $user@node1 'sudo hostnamectl set-hostname node1' &> /dev/null
-ssh -t $user@node1 'echo "/nfs    /etc/auto.nfs" | sudo tee -a /etc/auto.master &> /dev/null
+ssh -t $user@node1 'echo "/nfs    /etc/auto.nfs" | sudo tee -a /etc/auto.master' &> /dev/null
 ssh -t $user@node1 'sudo touch /etc/auto.nfs'
 ssh -t $user@node1 'sudo mkdir /nfs'
 ssh -t $user@node1 'echo "cluster -rw  master:/nfs/cluster" | sudo tee /etc/auto.nfs' &> /dev/null
 ssh -t $user@node1 'sudo systemctl start autofs' &> /dev/null
 ssh -t $user@node1 'sudo systemctl enable autofs' &> /dev/null
-################ Node 2 configuration ##############
-ssh -t $user@node2 'sudo apt install mpich libmpich-dev libopenmpi-dev build-essential make gcc g++ automake autoconf nfs-common autofs vim -y  &> /dev/null
+echo "################ Node 2 configuration ##############"
+ssh -t $user@node2 'sudo apt install mpich libmpich-dev libopenmpi-dev build-essential make gcc g++ automake autoconf nfs-common autofs vim -y'  &> /dev/null
 ssh -t $user@node2 'sudo hostnamectl set-hostname node1' &> /dev/null
-ssh -t $user@node2 'echo "/nfs    /etc/auto.nfs" | sudo tee -a /etc/auto.master &> /dev/null
+ssh -t $user@node2 'echo "/nfs    /etc/auto.nfs" | sudo tee -a /etc/auto.master' &> /dev/null
 ssh -t $user@node2 'sudo touch /etc/auto.nfs'
 ssh -t $user@node2 'echo "cluster -rw  master:/nfs/cluster" | sudo tee /etc/auto.nfs' &> /dev/null
 ssh -t $user@node2 'sudo mkdir /nfs'
