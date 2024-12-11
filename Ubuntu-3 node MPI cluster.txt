@@ -15,6 +15,8 @@ echo -e "\e[1;33m ##### Type yes if you are ready to install ############\e[0m"
 read ans
 if [ $ans == 'yes' ] 
 then
+user=$(whoami)
+echo "$user      ALL=(ALL)  NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 sudo apt install mpich libmpich-dev libopenmpi-dev build-essential make gcc g++ automake autoconf nfs-kernel-server vim -y
 sudo hostnamectl set-hostname master
 mip=$(hostname  --all-ip-addresses)
@@ -29,7 +31,8 @@ echo "#### Copying host file to other nodes ##########"
 echo "### Type yes at the prompt #######"
 echo "### Enter password when asked to enter password for the user ###"
 sleep 3
-user=$(whoami)
+ssh -t node1 'echo "$user      ALL=(ALL)  NOPASSWD:ALL" | sudo tee -a /etc/sudoers'
+ssh -t node1 'echo "$user      ALL=(ALL)  NOPASSWD:ALL" | sudo tee -a /etc/sudoers'
 scp /etc/hosts  $user@node1:/home/$user
 scp /etc/hosts $user@node2:/home/$user
 ssh -t $user@node1 sudo cp /home/$user/hosts /etc/hosts
