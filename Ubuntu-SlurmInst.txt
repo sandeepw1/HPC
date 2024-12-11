@@ -97,6 +97,7 @@ scp slurm.conf node1:/home/uadmin
 ssh -t node1 'sudo scp ~/slurm.conf  /etc/slurm/'
 ssh -t node1 'slurmd -C' >> slurm.conf
 sed -i 's/node1/node[1-2]/g' slurm.conf
+sudo sed -i 's/UpTime/#/g' /etc/slurm/slurm.conf
 sudo cp slurm.conf /etc/slurm/
 scp slurm.conf node1:/home/uadmin
 ssh -t node1 'sudo scp ~/slurm.conf  /etc/slurm/'
