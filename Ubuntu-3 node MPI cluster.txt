@@ -73,6 +73,9 @@ ssh -t $user@node2 'echo "cluster -rw  master:/nfs/cluster" | sudo tee /etc/auto
 ssh -t $user@node2 'sudo mkdir /nfs'
 ssh -t $user@node2 'sudo systemctl start autofs' &> /dev/null
 ssh -t $user@node2 'sudo systemctl enable autofs' &> /dev/null
+sudo systemctl restart nfs-server
+ssh -t node1 sudo systemctl restart autofs
+ssh -t node2 sudo systemctl restart autofs
 echo "###### Node configuration completed ######"
 echo "###### The MPI Cluster is ready ######"
 echo "##### Test it by creating a hello MPI program in /nfs/cluster directory ####"
