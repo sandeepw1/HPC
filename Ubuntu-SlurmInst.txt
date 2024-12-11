@@ -15,9 +15,14 @@ sudo dpkg -i  slurm-smd_24.11.0-1_amd64.deb
 sudo dpkg -i  slurm-smd-client_24.11.0-1_amd64.deb
 sudo dpkg -i slurm-smd-slurmctld_24.11.0-1_amd64.deb
 sudo dpkg -i slurm-smd-slurmdbd_24.11.0-1_amd64.deb
+ssh -t node1 sudo apt --fix-broken install -y
 ssh -t node1 'sudo dpkg -i ~/slurm-smd_24.11.0-1_amd64.deb'
 ssh -t node1 'sudo dpkg -i  ~/slurm-smd-client_24.11.0-1_amd64.deb'
 ssh -t node1 'sudo dpkg -i  ~/slurm-smd-slurmd_24.11.0-1_amd64.deb'
+ssh -t node2 sudo apt --fix-broken install -y
+ssh -t node2 'sudo dpkg -i ~/slurm-smd_24.11.0-1_amd64.deb'
+ssh -t node2 'sudo dpkg -i  ~/slurm-smd-client_24.11.0-1_amd64.deb'
+ssh -t node2 'sudo dpkg -i  ~/slurm-smd-slurmd_24.11.0-1_amd64.deb'
 echo "##########Instlling MariaDB Server ##################"
 sudo apt install mariadb-server -y
 echo "Enter a password for the database root user:"
