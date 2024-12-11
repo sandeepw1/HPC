@@ -6,7 +6,7 @@ ssh -t node2 sudo apt install build-essential fakeroot devscripts equivs -y
 wget https://download.schedmd.com/slurm/slurm-24.11.0.tar.bz2
 tar -xaf slurm*tar.bz2
 cd slurm-24.11.0/
-sudo mk-build-deps -i debian/control -y
+sudo mk-build-deps -i debian/control 
 sudo debuild -b -uc -us
 cd ..
 scp *.deb uadmin@node1:/home/uadmin
