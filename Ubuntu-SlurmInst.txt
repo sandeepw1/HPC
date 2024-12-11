@@ -1,5 +1,5 @@
 echo "############# Building and installing slurm deb package ############"
-pause 3
+sleep 3
 sudo apt install build-essential fakeroot devscripts equivs -y 
 ssh -t node1 sudo apt install build-essential fakeroot devscripts equivs -y
 ssh -t node2 sudo apt install build-essential fakeroot devscripts equivs -y
@@ -32,7 +32,7 @@ y
 y
 EOF
 echo "######### Remember your database root password -----------$pass ##############"
-pause 2
+sleep 2
 sudo systemctl start maridb
 sudo systemctl enable mariadb
 mysql -e "grant all on slurm_acct_db.* TO 'slurm'@'localhost' identified by 'some_pass' with grant option"
@@ -101,7 +101,7 @@ ssh -t node1 'sudo scp ~/slurm.conf  /etc/slurm/'
 ssh -t node1 'sudo systemctl start slurmd'
 sudo systemctl start slurmctld
 echo "######### Waiting for the cluster to stabilize #########"
-pause 5
+sleep 5
 echo "############### Check the output ##############"
 echo "############## If both the nodes are shown as idle.......Cluster is ready ###########"
 sinfo -Nrl
