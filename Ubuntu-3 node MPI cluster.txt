@@ -32,7 +32,7 @@ echo "### Type yes at the prompt #######"
 echo "### Enter password when asked to enter password for the user ###"
 sleep 3
 ssh -t node1 'echo "$user      ALL=(ALL)  NOPASSWD:ALL" | sudo tee -a /etc/sudoers'
-ssh -t node1 'echo "$user      ALL=(ALL)  NOPASSWD:ALL" | sudo tee -a /etc/sudoers'
+ssh -t node2 'echo "$user      ALL=(ALL)  NOPASSWD:ALL" | sudo tee -a /etc/sudoers'
 scp /etc/hosts  $user@node1:/home/$user
 scp /etc/hosts $user@node2:/home/$user
 ssh -t $user@node1 sudo cp /home/$user/hosts /etc/hosts
