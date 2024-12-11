@@ -36,8 +36,9 @@ sudo apt install mariadb-server -y
 echo -e "\e[1;33m ############################################### \e[0m"
 echo -e "\e[1;33m MYSQL_SECURE_INSTALLATION is starting \e[0m"
 echo -e "\e[1;32m Press Enter at the first prompt \e[0m"
-echo -e "\e[1;33m Press y on all other prompts except disallow root \e[0m"
+echo -e "\e[1;33m Press y on all other prompts except first unix socket and disallow root \e[0m"
 echo -e "\e[1;32m Please remember the new password for root user \e[0m"
+sudo mysql_secure_installation
 echo "######### Remember your database root password -----------##############"
 echo -e "\e[1;33m Enter Slurm user password for the database \e[0m"
 read pass
@@ -75,8 +76,8 @@ sudo mkdir /var/log/slurm
 sudo touch /var/log/slurm/slurmdbd.log 
 sudo chown -R slurm /var/log/slurm/ 
 sudo systemctl start slurmdbd
-sudo systemctl status slurmdb
-sudo systemctl enable slurmdb
+sudo systemctl status slurmdbd
+sudo systemctl enable slurmdbd
 sudo mkdir /var/spool/slurmctld
 sudo chown slurm:slurm /var/spool/slurmctld
 sudo chmod 755 /var/spool/slurmctld
