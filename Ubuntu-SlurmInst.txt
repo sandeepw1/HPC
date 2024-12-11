@@ -15,27 +15,34 @@ sudo dpkg -i  slurm-smd_24.11.0-1_amd64.deb
 sudo dpkg -i  slurm-smd-client_24.11.0-1_amd64.deb
 sudo dpkg -i slurm-smd-slurmctld_24.11.0-1_amd64.deb
 sudo dpkg -i slurm-smd-slurmdbd_24.11.0-1_amd64.deb
+ssh -t node1 'sudo dpkg -i ~/slurm-smd_24.11.0-1_amd64.deb'
+if [ $? != 0 ]
+then
 ssh -t node1 sudo apt --fix-broken install -y
 ssh -t node1 'sudo dpkg -i ~/slurm-smd_24.11.0-1_amd64.deb'
+fi
 ssh -t node1 'sudo dpkg -i  ~/slurm-smd-client_24.11.0-1_amd64.deb'
 ssh -t node1 'sudo dpkg -i  ~/slurm-smd-slurmd_24.11.0-1_amd64.deb'
+ssh -t node2 'sudo dpkg -i ~/slurm-smd_24.11.0-1_amd64.deb'
+if [ $? != 0 ] 
+then 
 ssh -t node2 sudo apt --fix-broken install -y
 ssh -t node2 'sudo dpkg -i ~/slurm-smd_24.11.0-1_amd64.deb'
+fi
 ssh -t node2 'sudo dpkg -i  ~/slurm-smd-client_24.11.0-1_amd64.deb'
 ssh -t node2 'sudo dpkg -i  ~/slurm-smd-slurmd_24.11.0-1_amd64.deb'
 echo "##########Instlling MariaDB Server ##################"
 sudo apt install mariadb-server -y
 echo "Enter a password for the database root user:"
-read pass
-mysql_secure_installation <<EOF
-y
-$pass
-$pass
-y
-y
-y
-y
-EOF
+read db_root_password
+mysql --user=root <<_EOF_
+  UPDATE mysql.user SET Password=PASSWORD('${db_root_password}') WHERE User='root';
+  DELETE FROM mysql.user WHERE User='';
+  DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+  DROP DATABASE IF EXISTS test;
+  DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+  FLUSH PRIVILEGES;
+_EOF_
 echo "######### Remember your database root password -----------$pass ##############"
 sleep 2
 sudo systemctl start maridb
