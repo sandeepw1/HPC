@@ -33,17 +33,14 @@ ssh -t node2 'sudo dpkg -i  ~/slurm-smd-client_24.11.0-1_amd64.deb'
 ssh -t node2 'sudo dpkg -i  ~/slurm-smd-slurmd_24.11.0-1_amd64.deb'
 echo "##########Instlling MariaDB Server ##################"
 sudo apt install mariadb-server -y
-echo "Enter a password for the database root user:"
-read db_root_password
-mysql --user=root <<_EOF_
-  UPDATE mysql.user SET Password=PASSWORD('${db_root_password}') WHERE User='root';
-  DELETE FROM mysql.user WHERE User='';
-  DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
-  DROP DATABASE IF EXISTS test;
-  DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
-  FLUSH PRIVILEGES;
-_EOF_
-echo "######### Remember your database root password -----------$pass ##############"
+echo -e "\e[1;33m ############################################### \e[0m"
+echo -e "\e[1;33m MYSQL_SECURE_INSTALLATION is starting \e[0m"
+echo -e "\e[1;32m Press Enter at the first prompt \e[0m"
+echo -e "\e[1;33m Press y on all other prompts except disallow root \e[0m"
+echo -e "\e[1;32m Please remember the new password for root user \e[0m"
+echo "######### Remember your database root password -----------##############"
+echo -e "\e[1;33m Enter Slurm user password for the database \e[0m"
+read pass
 sleep 2
 sudo systemctl start maridb
 sudo systemctl enable mariadb
@@ -104,7 +101,7 @@ scp slurm.conf node1:/home/uadmin
 ssh -t node1 'sudo scp ~/slurm.conf  /etc/slurm/'
 ssh -t node1 'slurmd -C' >> slurm.conf
 sed -i 's/node1/node[1-2]/g' slurm.conf
-sudo sed -i 's/UpTime/#/g' /etc/slurm/slurm.conf
+sudo sed -i 's/UpTime/#/g' slurm.conf
 sudo cp slurm.conf /etc/slurm/
 scp slurm.conf node1:/home/uadmin
 ssh -t node1 'sudo scp ~/slurm.conf  /etc/slurm/'
