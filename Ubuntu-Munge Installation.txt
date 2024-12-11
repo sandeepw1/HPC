@@ -35,15 +35,15 @@ echo "##### Munge installation completed #####"
 echo "#### Checking munge installation on master ####"
 munge -n | unmunge
 echo "##### Please verify output #####"
-pause 5
+sleep 5
 echo "#### Checking munge installation on node1 ####"
 munge -n | ssh $user@node1 unmunge
 echo "##### Please verify output #####"
-pause 5
+sleep 5
 echo "#### Checking munge installation on node2 ####"
 munge -n | ssh $user@node2 unmunge
 echo "##### Please verify output #####"
-pause 5
+sleep 5
 echo "#### if the output is correct....Munge Installation is complete ####"
 
 
