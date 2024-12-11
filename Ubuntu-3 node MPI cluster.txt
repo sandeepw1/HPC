@@ -78,7 +78,7 @@ echo "###### The MPI Cluster is ready ######"
 echo "##### Test it by creating a hello MPI program in /nfs/cluster directory ####"
 else
 echo "\e[1;31m ##Please prepare the machines and then try again ####\e[0m"
-
+fi
 
 
 
